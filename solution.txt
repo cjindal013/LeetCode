@@ -1,0 +1,132 @@
+Question Number : 29
+
+Question Link : https://leetcode.com/problems/divide-two-integers/
+
+Question Category : Medium
+
+Solution Approach : Binary Search (Accepted)
+
+Solution :
+
+This seems to a simple question though because we just have to answer the quotient after dividing dividend by divisor. 
+We can do this simply by dividing the two numbers or by doing recursive multiplication or from mod opeartor.
+But as stated in question, we can't use multiplication, division and mod operator. 
+So, we have to follow the procedure from where the divison operator arive i.e. by repetitive substraction.
+Now, this problem looks quite easy. Just substract the divisor from dividend till dividend >= divisor taking into account the sign operator and orner cases beforehand.
+But this approach will give you TLE(Time Limit Exceed) in the case of big dividend and small divisor.
+So, for now leaving the corner cases and the sign thing, we have to optimize the algorithm for getting the quotient by repetitive substraction.
+We will cover the leaved thing later on after finding a suitable logic for the main algorithm.
+So, here we go for the optimal solution approach.
+
+Firstly take the absolute value of both dividend and divisor because we can operate directly on positive numbers without any extra cases.
+	dividend=abs(dividend);
+        divisor=abs(divisor);
+Now, we have to find number of steps needed to reach just near about dividend by keep on adding divisor. So, not doing it iteratively one by one, 
+we can move by applying binary search here. Now the question arises how binary search?
+
+1. Firstly take divisor stored into some variable say temp. Also take a variable say k = 1 to store the steps moved towards dividend.
+2. Nextly, just keep on doubling the number untill temp > 0 and temp <= dividend.
+3. Till above condition satisfies, keep on doubling the k.
+4. After exiting the loop, simply substract the temp from dividend and add k to the final answer which is initially initialized as equal to 0.
+5. keep on doing the above Four steps till dividend >= divisor.
+
+Understand these five steps, then you will almost done with this problem. This is the key part of this problem's solution. Just read it 2-3 times and 
+try yourself with an example, you will understand it deeply. 
+
+For better understanding, here is one example : 
+Dividend = 20 and Divisor = 2
+ans = 0
+
+Loop 1 (20 >= 2):
+	Step 1 - temp = divisor = 2 and k=1
+	Step 2 - after this step loop, temp = 16 as (temp*2 = 32 > 20).
+	Step 3 - k = 8 (as this loop runs 3 times).
+	Step 4 - Dividend = 20 - 16 = 4 and ans = 0 + 8 = 8
+	Step 5 - 4 >= 2, hence one more loop runs.
+
+Loop 2 (4 >= 2):
+	Step 1 - temp = divisor = 2 and k=1
+	Step 2 - after this step loop, temp = 4 as (temp*2 = 8 > 4).
+	Step 3 - k = 2 (as this loop runs 1 time).
+	Step 4 - Dividend = 4 - 4 = 0 and ans = 8 + 2 = 10
+	Step 5 - 0 < 2, hence loop breaks and it comes out of this loop.
+
+Now, after understanding the heart of the solution, we move forward to some things which needs to taking care about it.
+
+1. Sign of the quotient : This has to be taken care because the sign of both dividend and divisor may vary.
+	For this, we just have to check if both numbers are positive or both are negative. If this so, then equate your boolean variable to true else false.
+	Later check, wheather your boolean variable is true or false. If it is false then make your ans negative else rest as it is.
+
+2. Overflow Cases : This has to be taken care because extreme value of negative int cannot be convert into positive value of int.
+	For this, firstly check if dividend == INT_MIN. If it is then further check 4 more conditions :
+		a. if divisor == INT_MIN, return 1.
+		b. if divisor == 1, return dividend.
+		c. if divisor == -1, return INT_MAX.
+		d. make your boolean variable to true and add 1 to the dividend. This is so, because as i stated earlier extreme value of negative int 
+	           cannot be converted back to positive int. So, we increment it to 1 for converting back to positive int. Use of boolean variable 
+		   indicates that there is a dividend whose value I increment by 1, so we need to decrement by 1 later.
+		So, for the d case we have to check at the end of the code that if the boolean variable is true or not. If it is true, then increment the dividend
+		by 1 and iteratively substract by divisor and increment the answer. O(1) time needed only.
+	Also if divisor == INT_MIN, return 0. As biggest divisor, everthing is 0.
+
+Author's Code : C++
+
+int divide(int dividend, int divisor) 
+     {
+
+        bool flag,is=false;
+
+        if (dividend==INT_MIN)
+	{
+            if (divisor==-1) return INT_MAX;
+            if (divisor==1) return INT_MIN;
+            if (divisor==INT_MIN) return 1;
+            is=true;
+            dividend+=1;
+        }
+
+        if (divisor==INT_MIN)
+	{
+            return 0;
+        }
+
+        if(dividend<0 && divisor<0 || dividend>=0 && divisor>=0)
+        flag=true;
+        else
+        flag=false;
+
+        int ans=0;
+        dividend=abs(dividend);
+        divisor=abs(divisor);
+
+        while(dividend>=divisor)
+        {
+            int tmp = divisor, k = 1;
+            while (tmp << 1 > 0 && tmp << 1 <= dividend)
+	    {
+                tmp <<= 1;
+                k <<= 1;
+            }         
+            dividend -= tmp;
+            ans += k;
+        }
+
+        if(is)
+        {
+            dividend+=1;
+            while(dividend>=divisor)
+            {
+                dividend-=divisor;
+                ans++;
+            }
+        }
+
+        if(!flag) ans=-ans;
+        return ans;
+    }
+
+Complexity Analysis :
+
+Time Complexity : O(log2(dividend)), time required to calculate the ans.
+Space Complexity : O(1) constant space.
+ 
